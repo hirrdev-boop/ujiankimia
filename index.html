@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kuis Kelas XU - Penilaian & Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e2b3c 0%, #0f1a24 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Card style */
+        .card {
+            background: #fef9ef;
+            border-radius: 36px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2d3e50;
+            border-left: 7px solid #f4a261;
+            padding-left: 15px;
+        }
+
+        /* Form login */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3e50;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0d5b5;
+            border-radius: 28px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        button {
+            background: #2a9d8f;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #21867a;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e76f51;
+        }
+
+        .btn-danger:hover {
+            background: #d45a3a;
+        }
+
+        .btn-admin {
+            background: #6c4ab6;
+            margin-top: 10px;
+        }
+
+        /* Quiz area */
+        .quiz-area {
+            display: none;
+        }
+
+        .quiz-area.active {
+            display: block;
+        }
+
+        .question-text {
+            background: #e9edc9;
+            padding: 20px;
+            border-radius: 28px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e2f;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .opt {
+            background: white;
+            border-radius: 60px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 2px solid #d4d4aa;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .opt.selected {
+            background: #cfe3cf;
+            border-color: #2a9d8f;
+            box-shadow: 0 0 0 2px #2a9d8f;
+        }
+
+        .opt input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .score-board {
+            background: #283845;
+            color: #fadfbb;
+            border-radius: 28px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .result-detail {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 20px;
+            background: #e3d5b5;
+            font-weight: 500;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .score-table th, .score-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .score-table th {
+            background: #2a9d8f;
+            color: white;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-benar {
+            background: #2a9d8f;
+            color: white;
+        }
+
+        .badge-salah {
+            background: #e76f51;
+            color: white;
+        }
+
+        .info-text {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        /* Navbar */
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: #4a6fa5;
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: #bc6c25;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Form Login -->
+    <div id="loginForm" class="card">
+        <h2>📝 Login Kuis Kelas XU</h2>
+        <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" id="studentName" placeholder="Masukkan nama kamu" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Kelas</label>
+            <select id="studentClass">
+                <option value="XU1">XU1</option>
+                <option value="XU2">XU2</option>
+                <option value="XU3">XU3</option>
+                <option value="XU4">XU4</option>
+                <option value="XU5">XU5</option>
+                <option value="XU6">XU6</option>
+            </select>
+        </div>
+        <button id="startQuizBtn">🚀 Mulai Kuis</button>
+        <button id="adminLoginBtn" class="btn-admin">👑 Masuk sebagai Admin</button>
+    </div>
+
+    <!-- Area Kuis (setelah login) -->
+    <div id="quizArea" class="quiz-area">
+        <div class="card">
+            <div class="nav-buttons">
+                <button id="logoutBtn" class="logout-btn">🚪 Logout</button>
+                <button id="adminModeBtn" class="btn-admin">📊 Lihat Skor (Admin)</button>
+            </div>
+            <h2>📝 Kuis Pengetahuan</h2>
+            <div class="question-text" id="questionText">Loading...</div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="quiz-buttons" style="display: flex; gap: 12px;">
+                <button id="submitBtn" style="flex:1;">✅ Submit Jawaban</button>
+                <button id="nextBtn" style="flex:1; background:#f4a261;">⏩ Soal Berikutnya</button>
+            </div>
+            <div class="score-board">
+                <span>✅ Benar: <span id="correctCount">0</span></span>
+                <span>❌ Salah: <span id="wrongCount">0</span></span>
+                <span>📊 Total Dijawab: <span id="totalAnswered">0</span></span>
+            </div>
+            <div id="quizResultMsg" class="result-detail"></div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel">
+        <div class="card">
+            <div class="nav-buttons">
+                <button id="backToUserBtn">🔙 Kembali ke User Mode</button>
+                <button id="exportDataBtn">📎 Export Data (JSON)</button>
+                <button id="clearAllDataBtn" class="btn-danger">🗑️ Hapus Semua Data</button>
+            </div>
+            <h2>📊 Data Skor Siswa (XU1 - XU6)</h2>
+            <div id="scoreTableContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ======================= DATA SOAL =======================
+    const questionsBank = [
+        { text: "Apa ibu kota Indonesia?", options: ["Jakarta", "Bandung", "Surabaya", "Medan"], correct: 0 },
+        { text: "Berapakah hasil dari 12 × 4 ?", options: ["48", "42", "58", "36"], correct: 0 },
+        { text: "Siapa penulis lagu 'Indonesia Raya'?", options: ["W.R. Supratman", "Ismail Marzuki", "Chairil Anwar", "H.B. Jassin"], correct: 0 },
+        { text: "Planet terdekat dengan Matahari adalah?", options: ["Venus", "Merkurius", "Bumi", "Mars"], correct: 1 },
+        { text: "Akar kuadrat dari 144 adalah?", options: ["10", "14", "12", "16"], correct: 2 }
+    ];
+
+    // ======================= STORAGE =======================
+    let allScores = []; // { name, class, correct, wrong, total, timestamp, answers (opsional) }
+
+    function loadFromStorage() {
+        const stored = localStorage.getItem('quiz_scores_xu');
+        if (stored) {
+            allScores = JSON.parse(stored);
+        } else {
+            allScores = [];
+        }
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('quiz_scores_xu', JSON.stringify(allScores));
+    }
+
+    // Tambah atau update skor user (jika sudah pernah submit, update)
+    function saveOrUpdateScore(userName, userClass, correct, wrong, total) {
+        const existingIndex = allScores.findIndex(s => s.name === userName && s.class === userClass);
+        const newRecord = {
+            name: userName,
+            class: userClass,
+            correct: correct,
+            wrong: wrong,
+            total: total,
+            lastUpdated: new Date().toLocaleString('id-ID')
+        };
+        
+        if (existingIndex !== -1) {
+            allScores[existingIndex] = newRecord;
+        } else {
+            allScores.push(newRecord);
+        }
+        saveToStorage();
+    }
+
+    // ======================= VARIABLES GLOBAL KUIS =======================
+    let currentUser = null; // { name, class }
+    let currentQIndex = 0;
+    let selectedOption = null;
+    let userCorrect = 0;
+    let userWrong = 0;
+    let totalAnswered = 0;
+    let quizCompleted = false; // sudah submit soal saat ini?
+    let userAnswers = []; // simpan jawaban user opsional
+
+    // DOM elements
+    const loginDiv = document.getElementById('loginForm');
+    const quizDiv = document.getElementById('quizArea');
+    const adminDiv = document.getElementById('adminPanel');
+    const studentNameInput = document.getElementById('studentName');
+    const studentClassSelect = document.getElementById('studentClass');
+    const startBtn = document.getElementById('startQuizBtn');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminModeBtn = document.getElementById('adminModeBtn');
+    const backToUserBtn = document.getElementById('backToUserBtn');
+    const exportBtn = document.getElementById('exportDataBtn');
+    const clearDataBtn = document.getElementById('clearAllDataBtn');
+    
+    const questionText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const correctSpan = document.getElementById('correctCount');
+    const wrongSpan = document.getElementById('wrongCount');
+    const totalSpan = document.getElementById('totalAnswered');
+    const quizResultMsg = document.getElementById('quizResultMsg');
+
+    // Helper reset quiz state
+    function resetQuizState() {
+        currentQIndex = 0;
+        selectedOption = null;
+        userCorrect = 0;
+        userWrong = 0;
+        totalAnswered = 0;
+        quizCompleted = false;
+        updateScoreDisplay();
+        loadQuestion();
+        quizResultMsg.innerHTML = '';
+    }
+
+    function updateScoreDisplay() {
+        correctSpan.innerText = userCorrect;
+        wrongSpan.innerText = userWrong;
+        totalSpan.innerText = totalAnswered;
+    }
+
+    function loadQuestion() {
+        selectedOption = null;
+        quizCompleted = false;
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        
+        const q = questionsBank[currentQIndex];
+        questionText.innerText = `${currentQIndex+1}. ${q.text}`;
+        optionsContainer.innerHTML = '';
+        
+        q.options.forEach((opt, idx) => {
+            const optDiv = document.createElement('div');
+            optDiv.className = 'opt';
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'quizOption';
+            radio.value = idx;
+            radio.id = `opt_${idx}`;
+            const label = document.createElement('label');
+            label.htmlFor = `opt_${idx}`;
+            label.innerText = opt;
+            
+            optDiv.appendChild(radio);
+            optDiv.appendChild(label);
+            optDiv.addEventListener('click', (e) => {
+                if (quizCompleted) {
+                    quizResultMsg.innerHTML = '⚠️ Soal ini sudah dijawab! Lanjut ke soal berikutnya.';
+                    return;
+                }
+                radio.checked = true;
+                selectedOption = idx;
+                document.querySelectorAll('.opt').forEach(el => el.classList.remove('selected'));
+                optDiv.classList.add('selected');
+            });
+            optionsContainer.appendChild(optDiv);
+        });
+        
+        // enable radios
+        if (document.querySelectorAll('input[name="quizOption"]')) {
+            // fresh
+        }
+    }
+
+    function submitAnswer() {
+        if (!currentUser) {
+            alert('Sesi hilang, silakan login ulang');
+            return;
+        }
+        if (quizCompleted) {
+            quizResultMsg.innerHTML = '❗ Kamu sudah menjawab soal ini. Klik "Soal Berikutnya" untuk lanjut.';
+            return;
+        }
+        if (selectedOption === null) {
+            quizResultMsg.innerHTML = '⚠️ Pilih jawaban terlebih dahulu!';
+            return;
+        }
+        
+        const currentQ = questionsBank[currentQIndex];
+        const isCorrect = (selectedOption === currentQ.correct);
+        
+        if (isCorrect) {
+            userCorrect++;
+            quizResultMsg.innerHTML = '✅ Jawaban Benar! +1 nilai benar.';
+        } else {
+            userWrong++;
+            const correctAnswerText = currentQ.options[currentQ.correct];
+            quizResultMsg.innerHTML = `❌ Jawaban Salah! Jawaban benar: "${correctAnswerText}".`;
+        }
+        totalAnswered++;
+        updateScoreDisplay();
+        
+        // simpan progres sementara ke storage setiap kali submit (update skor)
+        saveOrUpdateScore(currentUser.name, currentUser.class, userCorrect, userWrong, totalAnswered);
+        
+        quizCompleted = true;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        
+        // disable semua radio
+        const allRadios = document.querySelectorAll('input[name="quizOption"]');
+        allRadios.forEach(radio => radio.disabled = true);
+    }
+
+    function nextQuestion() {
+        if (!currentUser) return;
+        // pindah soal
+        currentQIndex = (currentQIndex + 1) % questionsBank.length;
+        loadQuestion();
+        // enable radios
+        const allRadios = document.querySelectorAll('input[name="quizOption"]');
+        allRadios.forEach(radio => radio.disabled = false);
+        quizResultMsg.innerHTML = '📌 Soal baru, silakan jawab.';
+    }
+
+    // tampilkan admin panel
+    function renderAdminPanel() {
+        const container = document.getElementById('scoreTableContainer');
+        if (!container) return;
+        
+        if (allScores.length === 0) {
+            container.innerHTML = '<div class="info-text">✨ Belum ada data skor. Silakan siswa mengerjakan kuis terlebih dahulu.</div>';
+            return;
+        }
+        
+        // Group by class XU1 - XU6
+        const classOrder = ['XU1', 'XU2', 'XU3', 'XU4', 'XU5', 'XU6'];
+        let html = '';
+        for (let cls of classOrder) {
+            const studentsInClass = allScores.filter(s => s.class === cls);
+            if (studentsInClass.length === 0) continue;
+            html += `<h3 style="margin-top:20px; color:#2a9d8f;">📚 Kelas ${cls}</h3>`;
+            html += `<table class="score-table">
+                        <thead>
+                            <tr><th>Nama</th><th>Benar</th><th>Salah</th><th>Total Dijawab</th><th>Skor Akhir</th><th>Terakhir Update</th></tr>
+                        </thead>
+                        <tbody>`;
+            for (let s of studentsInClass) {
+                const finalScore = s.correct;
+                html += `<tr>
+                            <td><strong>${escapeHtml(s.name)}</strong></td>
+                            <td><span class="badge badge-benar">✅ ${s.correct}</span></td>
+                            <td><span class="badge badge-salah">❌ ${s.wrong}</span></td>
+                            <td>${s.total}</td>
+                            <td>🎯 ${finalScore} poin</td>
+                            <td>${s.lastUpdated || '-'}</td>
+                         </tr>`;
+            }
+            html += `</tbody></table>`;
+        }
+        container.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // export data
+    function exportData() {
+        const dataStr = JSON.stringify(allScores, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `skor_kuis_xu_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('Data berhasil diexport!');
+    }
+
+    // clear all data
+    function clearAllData() {
+        if (confirm('⚠️ PERINGATAN: Semua data skor siswa akan dihapus permanen. Lanjutkan?')) {
+            allScores = [];
+            saveToStorage();
+            renderAdminPanel();
+            alert('Semua data skor telah dihapus.');
+            if (adminDiv.classList.contains('active')) renderAdminPanel();
+        }
+    }
+
+    // Login user
+    function loginAsUser() {
+        const name = studentNameInput.value.trim();
+        if (!name) {
+            alert('Masukkan nama kamu!');
+            return;
+        }
+        const kelas = studentClassSelect.value;
+        currentUser = { name: name, class: kelas };
+        
+        // Load skor yang sudah ada sebelumnya untuk user ini (jika ada)
+        const existing = allScores.find(s => s.name === name && s.class === kelas);
+        if (existing) {
+            userCorrect = existing.correct;
+            userWrong = existing.wrong;
+            totalAnswered = existing.total;
+        } else {
+            userCorrect = 0;
+            userWrong = 0;
+            totalAnswered = 0;
+        }
+        updateScoreDisplay();
+        resetQuizState(); // load soal pertama
+        
+        loginDiv.style.display = 'none';
+        quizDiv.classList.add('active');
+        adminDiv.classList.remove('active');
+    }
+
+    function logout() {
+        currentUser = null;
+        loginDiv.style.display = 'block';
+        quizDiv.classList.remove('active');
+        adminDiv.classList.remove('active');
+        studentNameInput.value = '';
+    }
+
+    function showAdminMode() {
+        if (!currentUser) {
+            alert('Silakan login terlebih dahulu sebagai user, lalu akses mode admin.');
+            return;
+        }
+        renderAdminPanel();
+        quizDiv.classList.remove('active');
+        loginDiv.style.display = 'none';
+        adminDiv.classList.add('active');
+    }
+
+    function backToUser() {
+        if (currentUser) {
+            quizDiv.classList.add('active');
+            adminDiv.classList.remove('active');
+            loginDiv.style.display = 'none';
+            // refres
